@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Territory feature flags</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='bootstrap.css') }}">
+
+    <script src="{{ url_for('static', filename='jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='validator.js') }}"></script>
+    <script src="{{ url_for('static', filename='contact.js') }}"></script>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+
+            .row.content {height:auto;}
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+      <div class="container">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        <a class="navbar-brand no-padding" href="">
+            <!-- <span class="logo-text">Home</span> -->
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/config/feature/{{version}}">Territory Feature Flags</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="envHtml" href="/config/envDiff/{{version}}">Prod feature flags</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="configCompare" href="/config/UK/PROD">Compare Config Versions</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-2 sidenav">
+            </div>
+            <div class="col-sm-8 text-left">
+                <!-- <h1>Welcome</h1> -->
+
+                <h3 style="padding-top: 20px;">Prod feature flags between territories</h3>
+                <h4 id="appVersion"></h4>
+
+                <table class="table table-secondary">
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature name</th>
+                            <th scope="col">UK</th>
+                            <th scope="col">IE</th>
+                            <th scope="col">DE</th>
+                            <th scope="col">ES</th>
+                            <th scope="col">IT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feature-flags">
+
+                    </tbody>
+                </table>
+
+                <div id="api-data">
+                </div>
+            </div>
+            <div class="col-sm-2 sidenav">
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="container-fluid text-center">
+        <p>Roku Team</p>
+    </footer>
+    <script>
+    $(document).ready(function(){
+        var rowData = "";
+        var host = "http://moinahmed.ddns.net:5000/api/config";
+
+        var keys = {};
+        $.ajax({
+            url: host  + "/UK/PROD/{{version}}",
+            success: function( response ) {
+
+                $.each(response.featureFlags, function(key, value) {
+                    if(jQuery.type(value) == "boolean"){
+                        keys[key] = [];
+                        keys[key].push({"UK": value})
+                    }
+                });
+                $.ajax({
+                    url: host  + "/IT/PROD/{{version}}",
+                    success: function( response ) {
+
+                        $.each(response.featureFlags, function(key, value) {
+                            if(jQuery.type(value) == "boolean"){
+                                if (! keys.hasOwnProperty(key)){
+                                    keys[key] = [];
+                                }
+                                keys[key].push({"IT": value});
+                            }
+                        });
+
+                        $.ajax({
+                            url: host  + "/ES/PROD/{{version}}",
+                            success: function( response ) {
+
+                                $.each(response.featureFlags, function(key, value) {
+                                    if(jQuery.type(value) == "boolean"){
+                                        if (! keys.hasOwnProperty(key)){
+                                            keys[key] = [];
+                                        }
+                                        keys[key].push({"ES": value})
+                                    }
+                                });
+
+
+                                $.ajax({
+                                    url: host  + "/DE/PROD/{{version}}",
+                                    success: function( response ) {
+
+                                        $.each(response.featureFlags, function(key, value) {
+                                            if(jQuery.type(value) == "boolean"){
+                                                if (! keys.hasOwnProperty(key)){
+                                                    keys[key] = [];
+                                                }
+                                                keys[key].push({"DE": value})
+                                            }
+                                        });
+
+                                        $.ajax({
+                                            url: host  + "/IE/PROD/{{version}}",
+                                            success: function( response ) {
+
+                                                $.each(response.featureFlags, function(key, value) {
+                                                    if(jQuery.type(value) == "boolean"){
+                                                        if (! keys.hasOwnProperty(key)){
+                                                            keys[key] = [];
+                                                        }
+                                                        keys[key].push({"IE": value})
+                                                    }
+                                                });
+
+
+
+                                                $.each(keys, function( featureName, territoryFeatureValues ) {
+                                                    // console.log( featureName + ": " );
+
+                                                    rowData += '<tr><th scope="row">'+removeCamelCase(featureName)+'</th>';
+                                                        rowData += printValuefor("UK", territoryFeatureValues);
+                                                        rowData += printValuefor("IE", territoryFeatureValues);
+                                                        rowData += printValuefor("DE", territoryFeatureValues);
+                                                        rowData += printValuefor("ES", territoryFeatureValues);
+                                                        rowData += printValuefor("IT", territoryFeatureValues);
+
+                                                    rowData += '</tr>';
+                                                });
+
+
+                                                $("#feature-flags").html(rowData);
+                                            }
+                                        });
+
+                                    }
+                                });
+
+                            }
+                        });
+
+
+                    }
+                });
+
+            }
+        });
+
+
+
+
+        function removeCamelCase(text){
+            var result = text.replace(/([A-Z]+)/g, " $1").replace(/([A-Z][a-z])/g, " $1");
+            return result.charAt(0).toUpperCase() + result.slice(1);
+        }
+
+        function printValuefor(territory, allTerritoryArray){
+            result ="";
+            $.each(allTerritoryArray, function( i, territoryArray ) {
+                if (Object.keys(territoryArray)[0] == territory){
+                    result += '<td class="alert-';
+                    if (territoryArray[territory] == false){
+                        result += 'danger">false</td>';
+                    } else if (territoryArray[territory] == true){
+                        result += 'success">true</td>';
+                    }
+                }
+            });
+            if (result == ""){
+                result = '<td class="alert-danger">false</td>';
+            }
+            return result;
+
+        }
+    });
+</script>
+
+</body>
+</html>

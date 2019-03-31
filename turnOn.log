@@ -1,0 +1,13 @@
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [omx_stream1](ids: 1)
+[PM2] [omx_stream1](1) ✓
+┌─────────────┬────┬─────────┬──────┬───────┬────────┬─────────┬────────┬─────┬───────────┬──────┬──────────┐
+│ App name    │ id │ version │ mode │ pid   │ status │ restart │ uptime │ cpu │ mem       │ user │ watching │
+├─────────────┼────┼─────────┼──────┼───────┼────────┼─────────┼────────┼─────┼───────────┼──────┼──────────┤
+│ MagicMirror │ 0  │ 2.6.0   │ fork │ 947   │ online │ 0       │ 16h    │ 0%  │ 1.9 MB    │ pi   │ disabled │
+│ app         │ 2  │ 2.6.0   │ fork │ 959   │ online │ 0       │ 16h    │ 0%  │ 11.3 MB   │ pi   │ disabled │
+│ omx_stream1 │ 1  │ N/A     │ fork │ 24017 │ online │ 82      │ 0s     │ 0%  │ 2.4 MB    │ pi   │ disabled │
+└─────────────┴────┴─────────┴──────┴───────┴────────┴─────────┴────────┴─────┴───────────┴──────┴──────────┘
+ Use `pm2 show <id|name>` to get more details about an app
+Powering on HDMI with preferred settings
+Called turn_off at  31/03/2019 09:45:01

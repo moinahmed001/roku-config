@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Prod feature flags</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='bootstrap.css') }}">
+
+    <script src="{{ url_for('static', filename='jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='validator.js') }}"></script>
+    <script src="{{ url_for('static', filename='contact.js') }}"></script>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        .table-grey,
+        .table-grey > th,
+        .table-grey > td {
+          background-color: #c6c8ca;
+        }
+
+        .table-hover .table-grey:hover {
+          background-color: #f7f7f7;
+        }
+
+        .table-hover .table-grey:hover > td,
+        .table-hover .table-grey:hover > th {
+          background-color: #f7f7f7;
+        }
+
+        .table .thead-grey th {
+          color: #000;
+          background-color: #aeaeaf;
+          border-color: #696969;
+        }
+
+        .table-grey {
+          color: #000;
+          background-color: #aeaeaf;
+        }
+
+        .table-grey th,
+        .table-grey td,
+        .table-grey thead th {
+          border-color: #696969;
+        }
+
+        .table-grey.table-bordered {
+          border: 0;
+        }
+
+        .table-grey.table-striped tbody tr:nth-of-type(odd) {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .table-grey.table-hover tbody tr:hover {
+          background-color: rgba(255, 255, 255, 0.075);
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+
+            .row.content {height:auto;}
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+      <div class="container">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        <a class="navbar-brand no-padding" href="">
+            <!-- <span class="logo-text">Home</span> -->
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" id="featureHtml" href="/config/feature/{{version}}">Territory Feature Flags
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/config/envDiff/{{version}}">Prod feature flags</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="configCompare" href="/config/UK/PROD">Compare Config Versions</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-2 sidenav">
+            </div>
+            <div class="col-sm-8 text-left">
+
+                <h3 style="padding-top: 20px;">Feature flags between Prod environments</h3>
+                <h4 id="appVersion"></h4>
+                <nav>
+                    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active" id="flagUkClicked-tab" data-toggle="tab" href="#flagUkClicked" role="tab" aria-controls="flagUkClicked" aria-selected="true">UK Feature flag</a>
+                        <a class="nav-item nav-link table-secondary" id="flagIeClicked-tab" data-toggle="tab" href="#flagIeClicked" role="tab" aria-controls="flagIeClicked" aria-selected="false">IE Feature flag</a>
+                        <a class="nav-item nav-link table-grey" id="flagDeClicked-tab" data-toggle="tab" href="#flagDeClicked" role="tab" aria-controls="flagDeClicked" aria-selected="false">DE Feature flag</a>
+                        <a class="nav-item nav-link table-dark" id="flagEsClicked-tab" data-toggle="tab" href="#flagEsClicked" role="tab" aria-controls="flagEsClicked" aria-selected="false">ES Feature flag</a>
+                        <a class="nav-item nav-link table-info" id="flagItClicked-tab" data-toggle="tab" href="#flagItClicked" role="tab" aria-controls="flagItClicked" aria-selected="false">IT Feature flag</a>
+                    </div>
+                </nav>
+                <div id="appVersion"></div>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="flagUkClicked" role="tabpanel" aria-labelledby="flagUkClicked-tab">
+                        <table class="table table-light">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="feature-flags-UK">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="flagIeClicked" role="tabpanel" aria-labelledby="flagIeClicked-tab">
+                        <table class="table table-secondary">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="feature-flags-IE">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="flagDeClicked" role="tabpanel" aria-labelledby="flagDeClicked-tab">
+                        <table class="table table-grey" id="deTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="feature-flags-DE">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="flagEsClicked" role="tabpanel" aria-labelledby="flagEsClicked-tab">
+                        <table class="table table-dark" id="esTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="feature-flags-ES">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="flagItClicked" role="tabpanel" aria-labelledby="flagItClicked-tab">
+                        <table class="table table-info" id="itTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="feature-flags-IT">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2 sidenav">
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="container-fluid text-center">
+        <p>Roku Team</p>
+    </footer>
+    <script>
+    $(document).ready(function(){
+        console.log({{version}});
+        // $("#featureHtml").prop('href', 'feature.html?appVersion={{version}}');
+        getAllEnvForTerritory("UK", "{{version}}");
+        getAllEnvForTerritory("IE", "{{version}}");
+        getAllEnvForTerritory("DE", "{{version}}");
+        getAllEnvForTerritory("ES", "{{version}}");
+        getAllEnvForTerritory("IT", "{{version}}");
+
+        function getAllEnvForTerritory(territory, appVersion){
+            var rowData = "";
+            var host = "http://moinahmed.ddns.net:5000/api/config";
+            var path = "/NowTV-NowTV-Roku/"+appVersion+"/"+territory+"-NowTV-NowTV-Roku-";
+
+            var keys = {};
+
+            $.ajax({
+                url: host  + "/"+territory+"/PROD/"+appVersion,
+                success: function( response ) {
+
+                    $.each(response.featureFlags, function(key, value) {
+                        if(jQuery.type(value) == "boolean"){
+                            keys[key] = [];
+                            keys[key].push({"Prod": value})
+                        }
+                    });
+                    $.ajax({
+                        url: host  + "/"+territory+"/PROD_TRIALS/"+appVersion,
+                        success: function( response ) {
+
+                            $.each(response.featureFlags, function(key, value) {
+                                if(jQuery.type(value) == "boolean"){
+                                    if (! keys.hasOwnProperty(key)){
+                                        keys[key] = [];
+                                    }
+                                    keys[key].push({"Prod Trials": value});
+                                }
+                            });
+                            $.ajax({
+                                url: host  + "/"+territory+"/PROD_TEST/"+appVersion,
+                                success: function( response ) {
+
+                                    $.each(response.featureFlags, function(key, value) {
+                                        if(jQuery.type(value) == "boolean"){
+                                            if (! keys.hasOwnProperty(key)){
+                                                keys[key] = [];
+                                            }
+                                            keys[key].push({"Prod Test": value});
+                                        }
+                                    });
+                                    rowData +="<tr><td colspan='4' style='text-align: center;'><h3>"+territory+" Feature flags</h3></td></tr>";
+                                    $.each(keys, function( featureName, territoryFeatureValues ) {
+                                        rowData += '<tr><th scope="row">'+removeCamelCase(featureName)+'</th>';
+                                        $.each(territoryFeatureValues, function( i, territoryArray ) {
+                                            $.each(territoryArray, function( territory, territoryValue ) {
+                                                if (territoryValue == false){
+                                                    rowData += '<td class="alert-danger">';
+                                                } else { rowData += '<td class="alert-success">'; }
+                                                rowData += territory + ": " + territoryValue + '</td>';
+                                                // console.log(territory + ": "+ territoryValue)
+                                            });
+                                        });
+                                        rowData += '</tr>';
+                                    });
+
+
+                                    $("#feature-flags-"+territory).html(rowData);
+                                }
+                            });
+                        }
+                    });
+
+                }
+            });
+        }
+
+        function removeCamelCase(text){
+            var result = text.replace(/([A-Z]+)/g, " $1").replace(/([A-Z][a-z])/g, " $1");
+            return result.charAt(0).toUpperCase() + result.slice(1);
+        }
+    });
+</script>
+
+</body>
+</html>
