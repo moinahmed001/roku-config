@@ -1,0 +1,46 @@
+/*****************************************************
+ * Magic Mirror                                      *
+ * Custom CSS                                        *
+ *                                                   *
+ * By Michael Teeuw http://michaelteeuw.nl           *
+ * MIT Licensed.                                     *
+ *                                                   *
+ * Add any custom CSS below.                         *
+ * Changes to this files will be ignored by GIT. *
+ *****************************************************/
+
+ body {
+
+ }
+.region.bottom.center{
+	margin-left: 41px;
+}
+
+#module_7_clock * {
+    color: rgba(7, 234, 245, 0.68);
+}
+
+#module_7_clock .time{
+	font-size:320%;
+	font-weight: bolder;
+	font-family: -webkit-pictograph;
+	padding-top: 23px;
+}
+.MMM-NowPlayingOnSpotify{
+    width: 36%;
+}
+.NPOS_infoText {
+	font-size:12px;
+}
+progress[value].NPOS_progress::-webkit-progress-value {
+  background-color: #6e119a;
+}
+progress.NPOS_progress{
+	border: 1px solid #6e119a;
+}
+.NPOS_nothingIsPlayingContent, .NPOS_nothingIsPlayingImage{
+	display: none;
+}
+.calendar * {
+    font-size: 17px;
+}
