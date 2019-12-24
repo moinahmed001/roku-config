@@ -12,8 +12,6 @@ pip install Flask-Caching
 
 pip install -U flask-cors
 
-pip install FlaskJSON
-
 pip install Flask-JSON
 
 pip install flask-bootstrap
