@@ -1,4 +1,12 @@
- body {
+@font-face {
+      font-family: Airstream;
+      font-style: normal;
+      font-weight: 100;
+      src: url("/home/pi/MagicMirror/fonts/Airstream-webfont.woff") format("truetype");
+      src: url("/home/pi/MagicMirror/fonts/Alcubierre.woff") format("woff");
+    }
+
+body {
         margin: 0 !important;
 	width: 100%;
 	height: 100%;
@@ -79,11 +87,11 @@ color: white;
 color: grey;
 }
 .compliments .xlarge {
-color: #3385ff;
+color: #2f4e7b;
 font-family: Airstream;
 }
 .newsfeed .medium {
-color: #3385ff;
+color: #2f4e7b;
 font-family: Airstream;
 }
 
