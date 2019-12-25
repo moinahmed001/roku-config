@@ -180,7 +180,7 @@ var config = {
 		  module: 'MMM-MyCommute',
 		  position: 'top_right',
 		  config: {
-		    apikey: 'AIzaSyCkw7SACrjD5T644KanKTwGG_vUWLiGWM4',
+		    apikey: '',
 		    origin: 'Millman Street, London WC1N 3EW, UK',
 		    startTime: '06:30',
 		    endTime: '08:00',
