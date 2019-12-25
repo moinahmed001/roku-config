@@ -54,14 +54,14 @@ def load_config(territory, env, version):
 def load_config_ui(version):
     try:
         return render_template("feature.html", version=version)
-    except Exception, e:
+    except Exception as e:
         return str(e)
 
 @app.route("/config/envDiff/<string:version>")
 def load_config_ui_for_env(version):
     try:
         return render_template("envDiff.html", version=version)
-    except Exception, e:
+    except Exception as e:
         return str(e)
 
 @app.route("/config/<territory>/<env>")
@@ -82,7 +82,7 @@ def config_check(territory, env):
 
     try:
         return render_template("config_diff.html", diff_result = diff_result, territory=territory, config_version_from=config_version_from, config_version_to=config_version_to, env=env, url=url, url_to_compare=url_to_compare)
-    except Exception, e:
+    except Exception as e:
         return str(e)
 
 @app.route("/prayer_timetable")
@@ -106,14 +106,21 @@ def prayer_time():
                 prayers.append({"Isha": to_print[4]})
                 prayerDict = {"data":{"timings":{"Fajr":str(to_print[0]), "Dhuhr": to_print[1], "Asr": to_print[2], "Maghrib": to_print[3], "Isha": to_print[4]}}};
 
-            except Exception ,e:
-                print str(e)
+            except Exception as e:
+                print(e)
 
     return jsonify(prayers)
 
+@app.route("/start_camera")
+def startCamera():
+    print("Called start camera at ", time.strftime('%d/%m/%Y %H:%M:%S'))
+    subprocess.call('pm2 restart omx_stream1', shell=True)
+#    subprocess.call('pm2 start omx_stream1', shell=True)
+    return "done!"
+
 @app.route("/")
 def hello():
-    print "Called turn_off at ", time.strftime('%d/%m/%Y %H:%M:%S')
+    print ("Called turn_off at ", time.strftime('%d/%m/%Y %H:%M:%S'))
     if tv_is_off():
         return "TV is OFF!"
     else:
@@ -121,50 +128,50 @@ def hello():
 
 @app.route("/turn_on")
 def turn_on():
-    print "turn on is called at ", time.strftime('%d/%m/%Y %H:%M:%S')
+    print ("turn on is called at ", time.strftime('%d/%m/%Y %H:%M:%S'))
     if tv_is_off():
-        print "attempt to turn the TV on!"
-        subprocess.call('pm2 restart omx_stream1', shell=True)
-        subprocess.call('tvservice -p', shell=True)
-        subprocess.call('fbset -accel true', shell=True)
+        print ("attempt to turn the TV on!")
+      #  subprocess.call('pm2 restart omx_stream1', shell=True)
+        subprocess.call('vcgencmd display_power 1', shell=True)
+     #   subprocess.call('fbset -accel true', shell=True)
         return "Turning on TV"
     else:
-        print "ERROR!! TV is currently ON!"
+        print ("ERROR!! TV is currently ON!")
         return "ERROR!! TV is currently ON!"
 
 @app.route("/turn_off")
 def turn_off():
-    print "turn on is called at ", time.strftime('%d/%m/%Y %H:%M:%S')
+    print ("turn on is called at ", time.strftime('%d/%m/%Y %H:%M:%S'))
     if tv_is_off():
-        print "ERROR!! TV is currently OFF!"
+        print ("ERROR!! TV is currently OFF!")
         return "ERROR!! TV is currently OFF!"
     else:
-        print "attempt to turn the TV off!"
-        subprocess.call('pm2 stop omx_stream1', shell=True)
-        subprocess.call('fbset -accel false', shell=True)
-        subprocess.call('tvservice -o', shell=True)
+        print ("attempt to turn the TV off!")
+      #  subprocess.call('pm2 stop omx_stream1', shell=True)
+       # subprocess.call('fbset -accel false', shell=True)
+        subprocess.call('vcgencmd display_power 0', shell=True)
         return "Turning off TV"
 
 @app.route("/reboot")
 def reboot():
-    print "attempt to reboot!"
+    print ("attempt to reboot!")
     subprocess.call('pm2 stop omx_stream1', shell=True)
-    subprocess.call('pm2 stop MagicMirror', shell=True)
+    subprocess.call('pm2 stop mm', shell=True)
     time.sleep(3)
     subprocess.call('sudo reboot', shell=True)
     return "Will restart the device!"
 
 @app.route("/restart-pi")
 def restart_pi():
-    print "attempt to restart magic mirror!"
+    print ("attempt to restart magic mirror!")
     subprocess.call('pm2 stop omx_stream1', shell=True)
-    subprocess.call('pm2 restart MagicMirror', shell=True)
+    subprocess.call('pm2 restart mm', shell=True)
     subprocess.call('pm2 start omx_stream1', shell=True)
     return "Will restart the magic mirror!"
 
 def tv_is_off():
-    p = delegator.run('tvservice -s')
-    if "TV is off" in p.out:
+    p = delegator.run('vcgencmd display_power')
+    if "=0" in p.out:
         return True
     else:
         return False
