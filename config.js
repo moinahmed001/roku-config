@@ -141,7 +141,7 @@ var config = {
 			config: {
 				location: "London",
 				locationID: "2643743",  //ID from http://bulk.openweathermap.org/sample/city.list.json.gz; unzip the gz file and find your city
-				appid: "d1e5571b72a9cea6da44eb7b6260d0c5"
+				appid: ""
 			}
 		},
 	{
