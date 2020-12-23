@@ -1,7 +1,22 @@
 from requests import get
+from requests.auth import HTTPBasicAuth
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
+
+
+def get_tariff(url):
+    try:
+        with closing(get(url, stream=True, auth = HTTPBasicAuth("u", "sk_live_xL8q1cUYWnc4cOgpR0X0iwMm:"))) as resp:
+            print(resp)
+            if is_good_response(resp):
+                return resp.content
+            else:
+                return None
+
+    except RequestException as e:
+        log_error('Error during requests to {0} : {1}'.format(url, str(e)))
+        return None
 
 
 def simple_get_json(url):

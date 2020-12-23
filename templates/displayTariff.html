@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Electricity Rate</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='bootstrap.css') }}">
+
+    <script src="{{ url_for('static', filename='jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='validator.js') }}"></script>
+    <script src="{{ url_for('static', filename='contact.js') }}"></script>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+
+            .row.content {height:auto;}
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+      <div class="container">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        <a class="navbar-brand no-padding" href="">
+            <!-- <span class="logo-text">Home</span> -->
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              &nbsp;
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-2 sidenav">
+            </div>
+            <div class="col-sm-8 text-left">
+                <!-- <h1>Welcome</h1> -->
+
+                <div id="api-data">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Time</th>
+                          <th scope="col">Cost</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                    {% for tariff in tariffs %}
+                        <tr class="alert {% if tariff.value_inc_vat < 8 %}
+                            alert-success
+                        {% elif tariff.value_inc_vat > 7 and  tariff.value_inc_vat < 11 %}
+                        {% elif tariff.value_inc_vat > 10 and  tariff.value_inc_vat < 16 %}
+                            alert-warning
+                        {% else %}
+                            alert-danger
+                        {% endif %}">
+                            <td>{{tariff.time}}</td>
+                            <td>
+                                {{tariff.value_inc_vat}}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-sm-2 sidenav">
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="container-fluid text-center">
+        <p>&nbsp;</p>
+    </footer>
+    <script>
+    </script>
+
+</body>
+</html>
