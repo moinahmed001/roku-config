@@ -45,8 +45,13 @@ for result in pricedata['results']:
     raw_from = result['valid_from']
     date_formatted = datetime.datetime.strptime(raw_from, "%Y-%m-%dT%H:%M:%SZ")
     mom_year = (date_formatted.year)
-    mom_month = (date_formatted.month)
-    mom_day = (date_formatted.day)
+    month = (date_formatted.month)
+    day = (date_formatted.day)
+    if month < 10:
+        month = "0{0}".format(month)
+    if day < 10:
+        day = "0{0}".format(day)
 
-    date = str(mom_year) + "-" + str(mom_month) + "-" + str(mom_day)
+    date = str(mom_year) + "-" + str(month) + "-" + str(day)
+    print(date)
     insertVariableIntoTable(raw_from, date, mom_price)

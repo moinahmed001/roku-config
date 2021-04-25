@@ -29,7 +29,8 @@ from meross_iot.utilities.limiter import RateLimitChecker, RateLimitResult, Rate
 from meross_iot.utilities.mqtt import generate_mqtt_password, generate_client_and_app_id, build_client_response_topic, \
     build_client_user_topic, verify_message_signature, device_uuid_from_push_notification, build_device_request_topic
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL, stream=sys.stdout)
+
 _LOGGER = logging.getLogger(__name__)
 _LIMITER = logging.getLogger("meross_iot.manager.apilimiter")
 
@@ -103,8 +104,8 @@ class MerossManager(object):
             device_tokens_per_interval=requests_per_second_limit
         )
         _LOGGER.info("Applying rate-limit checker config: \n "
-                     "- Global Max Burst Rate: %d" 
-                     "- Per-Device Max Burst Rate: %d" 
+                     "- Global Max Burst Rate: %d"
+                     "- Per-Device Max Burst Rate: %d"
                      "- Global Burst Rate: %d"
                      "- Per-Device Burst Rate: %d",
                      burst_requests_per_second_limit,
@@ -244,8 +245,8 @@ class MerossManager(object):
                 discovered_new_http_devices.append(hdevice)
 
         # Give some info
-        _LOGGER.info(f"The following devices were already known to me: {already_known_http_devices}")
-        _LOGGER.info(f"The following devices are new to me: {discovered_new_http_devices}")
+        # _LOGGER.info(f"The following devices were already known to me: {already_known_http_devices}")
+        # _LOGGER.info(f"The following devices are new to me: {discovered_new_http_devices}")
 
         # For every newly discovered device, retrieve its abilities and then build a corresponding wrapper.
         # In the meantime, update state of the already known devices

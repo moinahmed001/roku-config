@@ -31,22 +31,28 @@ async def main():
 
         if device in dev.name:
             print("FOUND name!")
-            if switch == "on":
+            is_on = dev.is_on()
+            print(is_on)
+            if is_on is False and switch.upper() == "OFF":
+                print("Its already off")
+                exit
+            elif is_on is True and switch.upper() == "ON":
+                print("Its already on!!")
+                exit
+            elif switch.upper() == "ON" and is_on is False:
                 print(f"Turning on {dev.name}...")
                 await dev.async_turn_on(channel=0)
-            elif switch == "off":
+            elif switch.upper() == "OFF"  and is_on is True:
                 print(f"Turing off {dev.name}")
                 await dev.async_turn_off(channel=0)
             else:
                 print("No state was provided!!!")
-
-
-        # print("Waiting a bit before turing it off")
-        # await asyncio.sleep(5)
+            exit
         i += 1
 
 
     if len(plugs) < 1:
+        await asyncio.sleep(5)
         print("No MSS210 plugs found...")
 
 
@@ -55,8 +61,6 @@ async def main():
     await http_api_client.async_logout()
 
 if __name__ == '__main__':
-    # On Windows + Python 3.8, you should uncomment the following
-    # asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.close()

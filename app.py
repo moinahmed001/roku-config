@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for
 from flask import jsonify
 from flask import request
 from flask_caching import Cache
@@ -34,13 +34,43 @@ cache.init_app(app)
 @app.route('/octopus/agile/tariff')
 def display_tariff():
     data = updated_tariff_data()
+    meross_data = []
+    if len(data) > 0:
+        valid_from = data[0]['valid_from']
+        valid_to = data[-1]['valid_to']
+        add_meross_data_to_tariff(valid_from, valid_to, data)
     try:
-        return render_template("displayTariff.html", tariffs=data)
+        links = []
+        for rule in app.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+            if "GET" in rule.methods and has_no_empty_params(rule):
+                url = url_for(rule.endpoint, **(rule.defaults or {}))
+                links.append(url)
+        return render_template("displayTariff.html", tariffs=data, urls=links)
     except Exception as e:
         return str(e)
 
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
+
+
 @app.route("/")
-def hello():
+def site_map():
+    links = []
+    for rule in app.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+        if "GET" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint, **(rule.defaults or {}))
+            links.append(url)
+    # links is now a list of url, endpoint tuples
+    return jsonify(links)
+
+@app.route("/tv_status")
+def tv_status():
     print ("Called root url at ", time.strftime('%d/%m/%Y %H:%M:%S'))
     if tv_is_off():
         return "TV is OFF!"

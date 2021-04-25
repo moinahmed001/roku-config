@@ -15,7 +15,7 @@ def insertOrUpdateVariableIntoTable(datetime, consumption):
         sqliteConnection = sqlite3.connect('octoprice.sqlite')
         cursor = sqliteConnection.cursor()
         print("Connected to SQLite")
-
+        print("UPDATE prices SET consumption = {0} WHERE datetime = {1}".format(consumption, datetime))
         cursor.execute('''UPDATE prices SET consumption = ? WHERE datetime = ?''', (consumption, datetime))
         sqliteConnection.commit()
         if cursor.rowcount > 0:
@@ -50,6 +50,7 @@ pricedata = response.json()
 
 for result in pricedata['results']:
 	consumption = result['consumption']
-	raw_from = result['interval_start']
-
+	raw_from = result['interval_start'].replace('+01:00','Z')
+	print(raw_from)
+	print(consumption)
 	insertOrUpdateVariableIntoTable(raw_from, consumption)

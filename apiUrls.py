@@ -14,9 +14,31 @@ from deepdiff import DeepDiff
 import os
 import requests
 import datetime
+import logging
 from appFunctions import *
 
 api_urls = Blueprint('api_urls', __name__)
+logging.basicConfig(filename="apiUrls.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w')
+logger=logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+import gkeepapi
+
+@api_urls.route('/api/keep/shopping')
+def keep():
+    keep = gkeepapi.Keep()
+    success = keep.login('moinahmed001@gmail.com', '.Junejuly1')
+
+    shopping = keep.get("1v9Cn-4RczmFNNOet9L4cHwodvWaBHFb8VJHKTKiqiqYFLzmqsEtBjCP8SZkDP7nI-Jcwuw")
+    result=[]
+    for item in shopping.unchecked:
+        if item.text and item.text != "":
+            result.append(item.text)
+    parsed = jsonify(result)
+    return parsed
+
 
 @api_urls.route('/api/octopus/agile/tariff')
 def fetch_new_tariff():
@@ -30,17 +52,96 @@ def fetch_new_consumption():
     result = jsonify(parsed)
     return result
 
+@api_urls.route('/api/octopus/gas/consumption')
+def fetch_gas_consumption():
+    parsed = gas_consumption_data()
+    result = jsonify(parsed)
+    return result
+
+@api_urls.route('/api/octopus/gas/consumption/daily')
+def fetch_gas_consumption_daily():
+    parsed = gas_consumption_data_daily()
+    result = jsonify(parsed)
+    return result
+
 @api_urls.route('/api/octopus/agile/consumption/daily')
 def fetch_new_consumption_daily():
     parsed = consumption_data_daily()
     result = jsonify(parsed)
     return result
 
+@api_urls.route('/api/octopus/go/consumption/daily')
+def fetch_go_consumption_daily():
+    parsed = go_consumption_data_daily()
+    result = jsonify(parsed)
+    return result
+
+@api_urls.route('/api/meross/add', methods=['POST'])
+def add_meross():
+    switch = request.form['switchSelectStatus'].upper()
+    if its_in_the_future(request.form['dateTime']):
+        date = datetime.datetime.strptime(request.form['dateTime'], "%Y-%m-%dT%H:%M:%SZ")
+        if switch.upper() == "OFF":
+            date = date - datetime.timedelta(minutes=1)
+
+        routineTime = getDateTime(date)
+        for device in request.form.getlist('deviceSelect'):
+            print("device name: " + device)
+
+            add_to_meross_db(device, routineTime, switch.upper())
+            # print(response)
+    else:
+        return "error: its in the past"
+    return "testing"
+
+
 @api_urls.route('/api/meross/<device>/<switch>')
 def run_file(device, switch):
     cmd = "python3 plug.py {0} {1}".format(device,switch)
     os.system(cmd)
-    return "test"
+    return "done!"
+
+
+@api_urls.route('/api/tado/geofence/<state>')
+def tado_geofence_away(state):
+    logger.info("Called GeoFence!")
+    state = state.upper()
+    if state == "HOME" or state == "AWAY":
+        logger.info("state is fine")
+    else:
+        logger.info("ERROR state is unknown {}".format(state))
+        exit(-1)
+    resp = requests.post('https://auth.tado.com/oauth/token',params={ "client_id": "tado-web-app","grant_type": "password", "scope": "home.user", "username": "moinahmed001@gmail.com", "password": "woodgate521", "client_secret": "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"})
+    if resp.status_code != 200:
+        # This means something went wrong.
+        logger.info("ERROR access_token response cannot be fetched {}".format(resp))
+        exit(-1)
+    token = resp.json()["access_token"]
+    resp = requests.get('https://my.tado.com/api/v1/me',headers= { "Authorization": "Bearer " + token})
+    if resp.status_code != 200:
+        # This means something went wrong.
+        logger.info("ERROR homeId cannot be fetched {}".format(resp))
+        exit(-1)
+    homeId = resp.json()["homeId"]
+    resp = requests.get('https://my.tado.com/api/v2/homes/'+ str(homeId) +'/state',headers= { "Authorization": "Bearer " + token})
+    if resp.status_code != 200:
+        # This means something went wrong.
+        logger.info("ERROR status cannot be fetched: {}".format(resp))
+        exit(-1)
+    presence = resp.json()["presence"].upper()
+    logger.info("Current status: {}".format(presence))
+    logger.info("Attempting to set state to: {}".format(state))
+    if presence == state:
+        logger.info(">>>>> ERROR: Current status {} == {} state. NO CHANGE!".format(presence, state))
+    else:
+        logger.info(">>>>> Changing state to {}".format(state))
+        resp = requests.put('https://my.tado.com/api/v2/homes/'+ str(homeId) +'/presenceLock',headers= { "Content-Type": "application/json" , "Authorization": "Bearer " + token}, params= { "homePresence": state })
+        if resp.status_code != 200 and resp.status_code != 204:
+            # This means something went wrong.
+            logger.info("ERROR setting the status: {}".format(resp))
+            exit(-1)
+
+    return "request was ok!"
 
 
 if __name__ == '__main__':

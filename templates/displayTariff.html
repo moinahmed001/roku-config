@@ -10,44 +10,83 @@
     <script src="{{ url_for('static', filename='validator.js') }}"></script>
     <script src="{{ url_for('static', filename='contact.js') }}"></script>
     <style>
-        /* Remove the navbar's default margin-bottom and rounded borders */
-        .navbar {
-            margin-bottom: 0;
-            border-radius: 0;
-        }
+    /* Remove the navbar's default margin-bottom and rounded borders */
+    .navbar {
+        margin-bottom: 0;
+        border-radius: 0;
+    }
 
-        /* Set black background color, white text and some padding */
-        footer {
-            background-color: #555;
-            color: white;
-            padding: 15px;
-        }
+    /* Set black background color, white text and some padding */
+    footer {
+        background-color: #555;
+        color: white;
+        padding: 15px;
+    }
+    .form-group select {
+        height: 112px;
+        width: 55%;
+    }
+    .form-group label {
+        width: 40%;
+        float: left;
+        padding-top: 6px;
+    }
+    #deviceSelectLabel {
+        padding-top:45px;
+    }
 
-        /* On small screens, set height to 'auto' for sidenav and grid */
-        @media screen and (max-width: 767px) {
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
 
-            .row.content {height:auto;}
-        }
+        .row.content {height:auto;}
+    }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
-      <div class="container">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-        <a class="navbar-brand no-padding" href="">
-            <!-- <span class="logo-text">Home</span> -->
-        </a>
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand no-padding" href="">
+                <!-- <span class="logo-text">Home</span> -->
+            </a>
 
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              &nbsp;
-            </li>
-          </ul>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Tariff Automation<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"href="http://moinahmed.ddns.net:7070" target="_blank">MagicMirror</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            TV
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="http://moinahmed.ddns.net:5000/tv_status" target="_blank">Status</a>
+                            <a class="dropdown-item" href="http://moinahmed.ddns.net:5000/turn_on" target="_blank">Turn On</a>
+                            <a class="dropdown-item" href="http://moinahmed.ddns.net:5000/turn_off" target="_blank">Turn Off</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            API
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="http://moinahmed.ddns.net:5000/api/octopus/agile/consumption" target="_blank">Full Consumption</a>
+                            <a class="dropdown-item" href="http://moinahmed.ddns.net:5000/api/octopus/agile/consumption/daily" target="_blank">Daily Consumption</a>
+                            <a class="dropdown-item" href="http://moinahmed.ddns.net:5000/api/octopus/agile/tariff" target="_blank">Tariff</a>
+                        </div>
+                    </li>
+<!--
+                    <li class="nav-item">
+                        <a class="nav-link"href="http://moinahmed.ddns.net:5000/mm" target="_blank">Start MagicMirror</a>
+                    </li> -->
+                </ul>
+            </div>
         </div>
-      </div>
     </nav>
 
     <div class="container-fluid text-center">
@@ -55,48 +94,144 @@
             <div class="col-sm-2 sidenav">
             </div>
             <div class="col-sm-8 text-left">
-                <!-- <h1>Welcome</h1> -->
+                <h1>Tariff Automation</h1>
+                <!--    <div>
+                1. Choose a timeslot
+                2. modal will appear.
+                i. click on/off for the devices
+                ii. submit
+                3. On top of the page, will show the time it is coming on and off for the devices
 
-                <div id="api-data">
-                    <table class="table">
-                      <thead>
+                2. ii -> will save the data into the database
+                In the background of pm2 job, the `python3 scheduler.py` will run
+
+                other options:
+                run every 0, 29, 30 and 59th min to check if something needs scheduling?
+                check against the sql to see when is the next scheduling
+            </div>-->
+            <div id="api-data">
+                <table class="table">
+                    <thead>
                         <tr>
-                          <th scope="col">Time</th>
-                          <th scope="col">Cost</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Cost</th>
+                            <th scope="col"></th>
                         </tr>
-                      </thead>
-                      <tbody>
+                    </thead>
+                    <tbody>
 
-                    {% for tariff in tariffs %}
+                        {% for tariff in tariffs %}
                         <tr class="alert {% if tariff.value_inc_vat < 8 %}
-                            alert-success
+                        alert-success
                         {% elif tariff.value_inc_vat > 7 and  tariff.value_inc_vat < 11 %}
                         {% elif tariff.value_inc_vat > 10 and  tariff.value_inc_vat < 16 %}
-                            alert-warning
+                        alert-warning
                         {% else %}
-                            alert-danger
+                        alert-danger
                         {% endif %}">
-                            <td>{{tariff.time}}</td>
-                            <td>
-                                {{tariff.value_inc_vat}}
-                            </td>
-                        </tr>
+                        <td>{{tariff.time}}</td>
+                        <td>
+                            {{tariff.value_inc_vat}}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#merossModal" data-whatever="{{tariff.time}} priced at {{tariff.value_inc_vat}}p" data-dateTime="{{tariff.valid_from}}">Automate</button>
+                            {% for switch in tariff.merossData %}
+                            {% if 'ON' == switch.status %}
+                            <button type="button" class="btn btn-light">{{switch.deviceName}}</button>
+                            {% endif %}
+                            {% if 'OFF' == switch.status %}
+                            <button type="button" class="btn btn-dark">{{switch.deviceName}}</button>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
                     {% endfor %}
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="col-sm-2 sidenav">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-sm-2 sidenav">
 
+    </div>
+
+    <!-- Modal -->
+
+    <div class="modal fade" id="merossModal" tabindex="-1" role="dialog" aria-labelledby="merossModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="merossModalLabel">New message</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="merossForm" action="/api/meross/add">
+                    <div class="modal-body">
+                        <input type="hidden" id="dateTime" name="dateTime">
+                        <div class="form-group">
+                            <label for="deviceSelect" id="deviceSelectLabel">Device</label>
+                            <select multiple class="form-control" id="deviceSelect" name="deviceSelect">
+                                <option value="living">Living Room</option>
+                                <option value="car">Car Charger</option>
+                                <option value="office">Office</option>
+                                <option value="kitchen">Kitchen</option>
+                                <option value="mirror">Mirror TV</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="switchSelectStatus">Switch</label>
+                            <select class="form-control" id="switchSelectStatus" name="switchSelectStatus">
+                                <option value="ON">On</option>
+                                <option valud="OFF" selected>Off</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <footer class="container-fluid text-center">
-        <p>&nbsp;</p>
-    </footer>
-    <script>
-    </script>
+</div>
+</div>
+
+<footer class="container-fluid text-center">
+    <p>&nbsp;</p>
+</footer>
+<script>
+$('#merossModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var tariffTime = button.data('whatever') // Extract info from data-* attributes
+    var dateTime = button.data('datetime') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    modal.find('.modal-title').text(tariffTime)
+    modal.find('.modal-body #dateTime').val(dateTime)
+})
+$("#merossForm").submit(function(e) {
+
+    e.preventDefault(); // avoid to execute the actual submit of the form.
+
+    var form = $(this);
+    var url = form.attr('action');
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: form.serialize(), // serializes the form's elements.
+        success: function(data)
+        {
+            location.reload();
+        }
+    });
+
+
+});
+</script>
 
 </body>
 </html>
