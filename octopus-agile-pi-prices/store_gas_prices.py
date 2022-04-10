@@ -34,7 +34,7 @@ pricedata = response.json()
 for result in pricedata['results']:
     consumption = result['consumption']
     interval_start = result['interval_start']
-    date_formatted = datetime.datetime.strptime(interval_start, "%Y-%m-%dT%H:%M:%SZ")
+    date_formatted = datetime.datetime.strptime(interval_start, "%Y-%m-%dT%H:%M:%S%z")
     mom_year = (date_formatted.year)
     month = (date_formatted.month)
     day = (date_formatted.day)
@@ -44,5 +44,5 @@ for result in pricedata['results']:
         day = "0{0}".format(day)
 
     date = str(mom_year) + "-" + str(month) + "-" + str(day)
-    print(date)
+
     insertVariableIntoTable(interval_start, date, consumption)

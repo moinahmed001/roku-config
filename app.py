@@ -8,17 +8,22 @@ from flask_bootstrap import Bootstrap
 import subprocess
 import time, re
 import delegator, json
-from getter import simple_get, simple_get_json, get_tariff
 from bs4 import BeautifulSoup
 from deepdiff import DeepDiff
 import os
 import requests
 import datetime
-from appFunctions import *
-from octopusModel import *
 
+from octopusModel import *
+from appFunctions import *
+from request_getter import *
 from apiUrls import api_urls
 from configUrls import config_urls
+# from .octopusModel import *
+# from .appFunctions import *
+# from .request_getter import *
+# from .apiUrls import api_urls
+# from .configUrls import config_urls
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 app = Flask(__name__)

@@ -1,11 +1,13 @@
 import time, re
 import delegator, json
-from getter import *
 from bs4 import BeautifulSoup
 import requests
 import datetime
 import sqlite3
 from decimal import Decimal
+
+from request_getter import *
+# from .request_getter import *
 
 def add_meross_data_to_tariff(valid_from, valid_to, tariff_data):
     conn = create_connection()

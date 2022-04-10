@@ -8,7 +8,6 @@ from flask_bootstrap import Bootstrap
 import subprocess
 import time, re
 import delegator, json
-from getter import simple_get, simple_get_json, get_tariff
 from bs4 import BeautifulSoup
 from deepdiff import DeepDiff
 import os
@@ -16,6 +15,9 @@ import requests
 import datetime
 import logging
 from appFunctions import *
+from request_getter import *
+# from .appFunctions import *
+# from .request_getter import *
 
 api_urls = Blueprint('api_urls', __name__)
 logging.basicConfig(filename="apiUrls.log",
@@ -29,7 +31,7 @@ import gkeepapi
 @api_urls.route('/api/keep/shopping')
 def keep():
     keep = gkeepapi.Keep()
-    success = keep.login('moinahmed001@gmail.com', '.Junejuly1')
+    success = keep.login('moinahmed001@gmail.com', '.August5')
 
     shopping = keep.get("1v9Cn-4RczmFNNOet9L4cHwodvWaBHFb8VJHKTKiqiqYFLzmqsEtBjCP8SZkDP7nI-Jcwuw")
     result=[]
@@ -39,6 +41,15 @@ def keep():
     parsed = jsonify(result)
     return parsed
 
+# curl -H 'Authorization: Bearer 38369370-cd58-4bb9-8099-775119e64b2e' https://api.smartthings.com/v1/devices/44eaae31-4cd4-5ccd-9985-51dcfabf80d6/status | python -m json.tool
+@api_urls.route('/api/samsung/tv/status')
+def samsung_tv_status():
+    resp = requests.get('https://api.smartthings.com/v1/devices/44eaae31-4cd4-5ccd-9985-51dcfabf80d6/status',headers= { "Authorization": "Bearer 38369370-cd58-4bb9-8099-775119e64b2e"})
+    if resp.status_code != 200:
+        # This means something went wrong.
+        logger.info("ERROR TV status cannot be fetched {}".format(resp))
+        exit(-1)
+    return jsonify({"status": resp.json()["components"]["main"]["switch"]["switch"]["value"]})
 
 @api_urls.route('/api/octopus/agile/tariff')
 def fetch_new_tariff():

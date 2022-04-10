@@ -8,7 +8,7 @@ from flask_bootstrap import Bootstrap
 import subprocess
 import time
 import delegator, json
-from getter import simple_get, simple_get_json
+from request_getter import simple_get, simple_get_json
 from bs4 import BeautifulSoup
 from deepdiff import DeepDiff
 

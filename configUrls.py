@@ -8,13 +8,15 @@ from flask_bootstrap import Bootstrap
 import subprocess
 import time, re
 import delegator, json
-from getter import simple_get, simple_get_json, get_tariff
 from bs4 import BeautifulSoup
 from deepdiff import DeepDiff
 import os
 import requests
 import datetime
 from appFunctions import *
+from request_getter import simple_get, simple_get_json, get_tariff
+# from .appFunctions import *
+# from .request_getter import simple_get, simple_get_json, get_tariff
 
 config_urls = Blueprint('config_urls', __name__)
 
@@ -24,6 +26,13 @@ config_urls = Blueprint('config_urls', __name__)
 def load_config_ui(version):
     try:
         return render_template("feature.html", version=version)
+    except Exception as e:
+        return str(e)
+
+@config_urls.route("/peacock/config/feature/<version>")
+def load_peacock_config_ui(version):
+    try:
+        return render_template("peacockFeature.html", version=version)
     except Exception as e:
         return str(e)
 
@@ -52,6 +61,36 @@ def config_check(territory, env):
 
     try:
         return render_template("config_diff.html", diff_result = diff_result, territory=territory, config_version_from=config_version_from, config_version_to=config_version_to, env=env, url=url, url_to_compare=url_to_compare)
+    except Exception as e:
+        return str(e)
+
+@config_urls.route("/peacock/config/<territory>/<env>")
+def peacock_config_check(territory, env):
+    # https://config.clients.peacocktv.com/US/NBCU/Peacock/Roku/PROD/3.2.10/config.json
+    # https://config.clients.stable-int.peacocktv.com/US/NBCU/Peacock/Roku/STABLE_INT/3.2.10/config.json
+
+    config_version_from = request.args.get('config_version_from', default = '3.4.10', type = str)
+    config_version_to = request.args.get('config_version_to', default = '3.5.10', type = str)
+    base_url = "https://config.clients.stable-int.peacocktv.com/US/NBCU/Peacock/Roku"
+    if (env.startswith('PRO')):
+        base_url="https://config.clients.peacocktv.com/US/NBCU/Peacock/Roku"
+
+    if territory == "SHOWTIME":
+        base_url = "http://uat.config.sky.com"
+
+        if (env.startswith('PROD')):
+            base_url="http://config.ott.sky.com"
+
+    url = base_url + "/{0}/{1}/config.json".format(env, config_version_from)
+    url_to_compare = base_url + "/{0}/{1}/config.json".format(env, config_version_to)
+
+    old_url_fetched_response = simple_get_json(url)
+    new_url_fetched_response = simple_get_json(url_to_compare)
+
+    diff_result = DeepDiff(json.loads(old_url_fetched_response), json.loads(new_url_fetched_response), ignore_order=True)
+
+    try:
+        return render_template("peacock_config_diff.html", diff_result = diff_result, territory=territory, config_version_from=config_version_from, config_version_to=config_version_to, env=env, url=url, url_to_compare=url_to_compare)
     except Exception as e:
         return str(e)
 
@@ -122,6 +161,22 @@ def load_config(territory, env, version):
     response = simple_get_json(url)
     diff_result = jsonify(json.loads(response))
     return diff_result
+
+@cross_origin()
+@config_urls.route('/peacock/api/config/<env>/<version>')
+def load_config_peacock(env, version):
+    # https://config.clients.peacocktv.com/US/NBCU/Peacock/Roku/PROD/3.2.10/config.json
+    # https://config.clients.stable-int.peacocktv.com/US/NBCU/Peacock/Roku/STABLE_INT/3.2.10/config.json
+    base_url = "https://config.clients.stable-int.peacocktv.com/US/NBCU/Peacock/Roku"
+    if (env.startswith('PRO')):
+        base_url="https://config.clients.peacocktv.com/US/NBCU/Peacock/Roku"
+
+    url = base_url + "/{0}/{1}/config.json".format(env, version)
+
+    response = simple_get_json(url)
+    diff_result = jsonify(json.loads(response))
+    return diff_result
+
 
 
 @config_urls.route("/web/config/hash")
