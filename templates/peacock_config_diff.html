@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Territory feature flags</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='bootstrap.css') }}">
+
+    <script src="{{ url_for('static', filename='jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='validator.js') }}"></script>
+    <script src="{{ url_for('static', filename='contact.js') }}"></script>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        pre {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-left: 3px solid #ce1818;
+            color: #666;
+            page-break-inside: avoid;
+            font-family: monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 1.6em;
+            max-width: 100%;
+            overflow: auto;
+            padding: 1em 1.5em;
+            display: block;
+            word-wrap: break-word;
+        }
+        form{
+            background: #9090f136;
+            padding: 10px 0 0 0;
+            border: 1px blue solid;
+            border-right: 6px #ff2828 solid;
+            margin-top: 20px;
+        }
+        label{
+            padding-top: 12px !important;
+        }
+        .form-group{
+            margin-left: -8%;
+        }
+        .form-control-plaintext{
+            background-color: white;
+            width: 60px;
+            height: 48px;
+        }
+        pre a{
+            color: #ffffff;
+        }
+        .col-sm-1, .col-sm-2, .col-sm-3{
+            padding-left: 3px;
+            padding-right: 3px;
+        }
+        input{
+            height: 34px;
+            padding-left: 10px;
+        }
+        .added{
+            border-left-color: #00ff14;
+        }
+        .changed{
+            border-left-color: #ffb100;
+        }
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+
+            .row.content {height:auto;}
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand no-padding" href="">
+                <!-- <span class="logo-text">Home</span> -->
+            </a>
+
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/peacock/config/feature/{{config_version_to}}">Compare Feature Flags</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="configCompare" href="/peacock/config/US/PROD">Compare Config Versions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-2 sidenav">
+            </div>
+            <div class="col-sm-8 text-left">
+                <!-- <h1>Welcome</h1> -->
+                <!-- <h3>Looking at <strong>{{env}}</strong> config diff between: {{config_version_from}} AND {{config_version_to}} for the territory: {{territory}}</h3> -->
+                <form>
+                    <div class="form-group row">
+                      <label for="territorySelect" class="col-sm-2 col-form-label text-right">Looking at</label>
+                      <div class="col-sm-1">
+                          <select id="territorySelect" name="territory" class="form-control form-control-lg">
+                              <option value="US" {% if territory == 'US' %} selected {% endif %}>US</option>
+                          </select>
+                      </div>
+                      <label for="envSelect" class="col-sm-2 col-form-label text-center"> for the Env</label>
+                      <div class="col-sm-2">
+                          <select id="envSelect" name="env" class="form-control form-control-lg">
+                              <option value="PROD" {% if env == 'PROD' %} selected {% endif %}>Prod</option>
+                              <option value="PROD_TEST" {% if env == 'PROD_TEST' %} selected {% endif %}>Prod Test</option>
+                              <option value="PROD_ANALYTICS" {% if env == 'PROD_ANALYTICS' %} selected {% endif %}>Prod Analytics</option>
+                              <option value="PROD_AUTO" {% if env == 'PROD_AUTO' %} selected {% endif %}>Prod Auto</option>
+                              <option value="PROTON" {% if env == 'PROTON' %} selected {% endif %}>Proton</option>
+                              <option value="STABLE_INT" {% if env == 'STABLE_INT' %} selected {% endif %}>Stable Int</option>
+                          </select>
+                      </div>
+                      <label for="configFromInput" class="col-sm-2 col-form-label text-right">Config Between</label>
+                      <div class="col-sm-1">
+                          <input type="text" class="form-control-plaintext" id="configFromInput" value="{{config_version_from}}">
+                      </div>
+                      <label for="configToInput" class="col-sm-1 col-form-label" style="width: 5%; text-align: center;">And</label>
+                      <div class="col-sm-1">
+                          <input type="text" class="form-control-plaintext" id="configToInput" value="{{config_version_to}}">
+                      </div>
+                    </div>
+
+                </form>
+
+                <h4 style="padding-top: 20px;">Comparing</h4>
+                    <pre class="bg-info added"><a target="_blank" href="{{url}}"> {{url}}</a></pre>
+                    <pre class="text-right bg-success added"><a target="_blank" href="{{url_to_compare}}"> {{url_to_compare}}</a></pre>
+
+                <div id="api-data">
+                    <h4>Items that has been removed</h4>
+                    {% for item in diff_result.dictionary_item_removed %}
+                    {% autoescape false %}
+                        <pre>{{item | replace("root", "") | replace("['", "['<span class=\"text-danger\">") | replace("']", "</span>']")}}</pre>
+                    {% endautoescape %}
+
+                    {% endfor %}
+                    <h4>Items that has been added</h4>
+                    {% for item in diff_result.dictionary_item_added %}
+                        <pre class="added">{{item | replace("root", "")}}</pre>
+                    {% endfor %}
+                    <h4>Values that has changed</h4>
+                    {% for item in diff_result.values_changed %}
+                    <pre class="changed">{{item | replace("root", "")}}:{{diff_result.values_changed[item] | replace ("u'", "'") | replace("_", " ")}}</pre>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-sm-2 sidenav">
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="container-fluid text-center">
+        <p>Roku Team</p>
+    </footer>
+    <script>
+    $(document).ready(function(){
+        $('#territorySelect').change(function() {
+            submitForm()
+        });
+        $('#envSelect').change(function() {
+            submitForm()
+        });
+        $('#configFromInput').change(function() {
+            submitForm()
+        });
+        $('#configToInput').change(function() {
+            submitForm()
+        });
+        function submitForm(){
+            var territorySelect = $('#territorySelect').val()
+            var envSelect = $('#envSelect').val()
+            var configFromInput = $('#configFromInput').val()
+            var configToInput = $('#configToInput').val()
+            var location = "http://moinahmed.ddns.net:5000/peacock/config/"+territorySelect+"/"+envSelect+"?config_version_from="+configFromInput+"&config_version_to="+configToInput
+            window.location.href = location
+            // console.log(location);
+        }
+    });
+</script>
+
+</body>
+</html>
