@@ -29,9 +29,31 @@ def insertVariableIntoTable(datetime, date, price):
             sqliteConnection.close()
             print("The SQLite connection is closed. We are done here.")
 
+def normalise_data(pricedata):
+    for result in pricedata['results']:
+        mom_price = result['value_inc_vat']
+        raw_from = result['valid_from']
+        date_formatted = datetime.datetime.strptime(raw_from, "%Y-%m-%dT%H:%M:%SZ")
+        mom_year = (date_formatted.year)
+        month = (date_formatted.month)
+        day = (date_formatted.day)
+        if month < 10:
+            month = "0{0}".format(month)
+        if day < 10:
+            day = "0{0}".format(day)
 
-response = requests.get('https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/'+agile_tariff_code+'/standard-unit-rates/')
+        date = str(mom_year) + "-" + str(month) + "-" + str(day)
+        print(date)
+        insertVariableIntoTable(raw_from, date, mom_price)
+
+# i = 1
+# while i < 40:
+    # print('>>>>>' + 'https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-A/standard-unit-rates/?page='+str(i))
+    # response = requests.get('https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-A/standard-unit-rates/?page='+str(i))
+response = requests.get('https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-A/standard-unit-rates/')
 pricedata = response.json()
+normalise_data(pricedata)
+    # i += 1
 # print(pricedata['results'][0]['value_inc_vat'])
 # mom_price = pricedata['results'][0]['value_inc_vat']
 # raw_from = pricedata['results'][0]['valid_from']
@@ -39,19 +61,3 @@ pricedata = response.json()
 # mom_price = pricedata['results'][1]['value_inc_vat']
 # raw_from = pricedata['results'][1]['valid_from']
 # insertVariableIntoTable(raw_from, mom_price)
-
-for result in pricedata['results']:
-    mom_price = result['value_inc_vat']
-    raw_from = result['valid_from']
-    date_formatted = datetime.datetime.strptime(raw_from, "%Y-%m-%dT%H:%M:%SZ")
-    mom_year = (date_formatted.year)
-    month = (date_formatted.month)
-    day = (date_formatted.day)
-    if month < 10:
-        month = "0{0}".format(month)
-    if day < 10:
-        day = "0{0}".format(day)
-
-    date = str(mom_year) + "-" + str(month) + "-" + str(day)
-    print(date)
-    insertVariableIntoTable(raw_from, date, mom_price)

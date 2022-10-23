@@ -104,7 +104,7 @@ def consumption_data_daily():
     result = []
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("""SELECT date from 'prices' group by date order by date(date) DESC limit 1,7;""")
+    cur.execute("""SELECT date from 'prices' group by date order by date(date) DESC limit 1,31;""")
     # cur.execute("""SELECT date from 'prices' where consumption is not NULL group by date order by date(date) DESC;""")
 
     rows = cur.fetchall()
@@ -119,15 +119,23 @@ def go_consumption_data_daily():
     result = []
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("""SELECT date from 'prices' group by date order by date(date) DESC limit 1,7;""")
+    cur.execute("""SELECT date from 'prices' group by date order by date(date) DESC limit 1,31;""")
     # cur.execute("""SELECT date from 'prices' where consumption is not NULL group by date order by date(date) DESC;""")
 
     rows = cur.fetchall()
+    total_cost = 0
+    total_kwh = 0
+
     for row in rows:
         consumption_date = row[0]
         daily_total = fetch_daily_go_consumption(consumption_date)
+        calculated_total = total_without_cheap_tariff(consumption_date)
+        
+        total_cost = total_cost + calculated_total['total_cost']
+        total_kwh = total_kwh + calculated_total['kwH']
         # daily_total["average"]= fetch_daily_consumption_average(consumption_date)
         result.append(daily_total)
+    result.append({"total_cost": total_cost, "total_kwh": total_kwh})
     return result
 
 def fetch_daily_go_consumption(consumption_date):
@@ -138,12 +146,13 @@ def fetch_daily_go_consumption(consumption_date):
     cur2.execute(sql_select_query, (consumption_date,))
 
     all_rows = cur2.fetchall()
-    daily_total = 25
-    daily_agile_total = 21
-    late_night_rate = 5
-    rest_rate = 14.12
+    daily_total = 37.65
+    daily_agile_total = 45.07
+    late_night_rate = 7.5
+    rest_rate = 35.11
 
     kwh = 0
+    peak_kwh = 0
     for cost in all_rows:
         datetime = cost[0]
         price = cost[1]
@@ -155,6 +164,7 @@ def fetch_daily_go_consumption(consumption_date):
             daily_total = daily_total + (late_night_rate * consumption)
         else:
             daily_total = daily_total + (rest_rate * consumption)
+            peak_kwh = peak_kwh + consumption
 
         kwh = kwh + consumption
         daily_agile_total = daily_agile_total + (price * consumption)
@@ -163,7 +173,41 @@ def fetch_daily_go_consumption(consumption_date):
     total_agile = round(Decimal(daily_agile_total/100), 2)
     total_go = round(Decimal(daily_total/100), 2)
 
-    return {'date': consumption_date, 'costGo': Decimal(total_go), 'costAgile': Decimal(total_agile), 'kwH': add_zero_less_than10(kwh)}
+    return {'date': consumption_date, 'costGo': Decimal(total_go), 'costAgile': Decimal(total_agile), 'peak_kwh': round(Decimal(peak_kwh)), 'kwH': add_zero_less_than10(kwh)}
+
+
+def total_without_cheap_tariff(consumption_date):
+    conn = create_connection()
+    cur2 = conn.cursor()
+    sql_select_query = """SELECT datetime, price, consumption from 'prices' where date = ?;"""
+    # sql_select_query = """SELECT price, consumption from 'prices' where date = ? AND consumption > 0;"""
+    cur2.execute(sql_select_query, (consumption_date,))
+
+    all_rows = cur2.fetchall()
+    daily_total = 0
+    late_night_rate = 7.5
+    rest_rate = 35.11
+
+    kwh = 0
+    for cost in all_rows:
+        datetime = cost[0]
+        price = cost[1]
+        consumption = 0
+        if cost[2]:
+            consumption = cost[2]
+
+        if late_night(datetime):
+            daily_total = daily_total + 0
+        else:
+            daily_total = daily_total + ((rest_rate * consumption) - (late_night_rate * consumption))
+            kwh = kwh + consumption
+
+
+    total_go = round(Decimal(daily_total/100), 2)
+    #return total_go
+    return {'total_cost': total_go, 'kwH': round(Decimal(add_zero_less_than10(kwh)))}
+
+
 
 def add_zero_less_than10(kwh):
     figure = Decimal(round(Decimal(kwh), 2))
@@ -174,7 +218,7 @@ def add_zero_less_than10(kwh):
 def late_night(time_with_date):
     given_time = datetime.datetime.strptime(time_with_date, "%Y-%m-%dT%H:%M:%SZ")
 
-    if (given_time.minute == 30 and given_time.hour == 0) or (given_time.hour > 0 and given_time.hour < 4) or (given_time.minute == 0 and given_time.hour == 4):
+    if (given_time.minute == 30 and given_time.hour == 21) or (given_time.minute == 0 and given_time.hour == 22) or (given_time.minute == 30 and given_time.hour == 22) or (given_time.minute == 0 and given_time.hour == 23) or (given_time.minute == 30 and given_time.hour == 23) or (given_time.minute == 0 and given_time.hour == 0):
         return True
 
     return False
@@ -187,7 +231,7 @@ def fetch_daily_consumption(consumption_date):
     cur2.execute(sql_select_query, (consumption_date,))
 
     all_rows = cur2.fetchall()
-    daily_total = 21
+    daily_total = 45.07
     kwh = 0
     for cost in all_rows:
         price = cost[0]

@@ -29,14 +29,14 @@ def load_config_ui(version):
     except Exception as e:
         return str(e)
 
-@config_urls.route("/peacock/config/feature/<version>")
+#@config_urls.route("/peacock/config/feature/<version>")
 def load_peacock_config_ui(version):
     try:
         return render_template("peacockFeature.html", version=version)
     except Exception as e:
         return str(e)
 
-@config_urls.route("/config/envDiff/<string:version>")
+#@config_urls.route("/config/envDiff/<string:version>")
 def load_config_ui_for_env(version):
     try:
         return render_template("envDiff.html", version=version)
@@ -64,7 +64,7 @@ def config_check(territory, env):
     except Exception as e:
         return str(e)
 
-@config_urls.route("/peacock/config/<territory>/<env>")
+#@config_urls.route("/peacock/config/<territory>/<env>")
 def peacock_config_check(territory, env):
     # https://config.clients.peacocktv.com/US/NBCU/Peacock/Roku/PROD/3.2.10/config.json
     # https://config.clients.stable-int.peacocktv.com/US/NBCU/Peacock/Roku/STABLE_INT/3.2.10/config.json
@@ -162,8 +162,8 @@ def load_config(territory, env, version):
     diff_result = jsonify(json.loads(response))
     return diff_result
 
-@cross_origin()
-@config_urls.route('/peacock/api/config/<env>/<version>')
+#@cross_origin()
+#@config_urls.route('/peacock/api/config/<env>/<version>')
 def load_config_peacock(env, version):
     # https://config.clients.peacocktv.com/US/NBCU/Peacock/Roku/PROD/3.2.10/config.json
     # https://config.clients.stable-int.peacocktv.com/US/NBCU/Peacock/Roku/STABLE_INT/3.2.10/config.json

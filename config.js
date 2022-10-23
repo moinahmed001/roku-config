@@ -226,6 +226,14 @@ var config = {
 				alertTimer: 15000
 			}
 		},
+    {
+        module: 'MMM-NetworkScanner',
+        position: 'top_right', 
+        config: {
+		showLastSeenWhenOffline: true
+            // Optional config options
+        }        
+    },
 
 	]
 

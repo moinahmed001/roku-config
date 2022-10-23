@@ -27,7 +27,7 @@ def insertVariableIntoTable(datetime, date, consumption):
             print("The SQLite connection is closed. We are done here.")
 
 
-response = requests.get('https://api.octopus.energy/v1/gas-meter-points/7680711609/meters/E6S14525412061/consumption/', auth=('sk_live_xL8q1cUYWnc4cOgpR0X0iwMm', ''))
+response = requests.get('https://api.octopus.energy/v1/gas-meter-points/7680711609/meters/E6S14525412061/consumption/', auth=('sk_live_kDvb4TGm7jMjw4DFo8WDPEx9', ''))
 
 pricedata = response.json()
 

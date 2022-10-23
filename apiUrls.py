@@ -26,20 +26,21 @@ logging.basicConfig(filename="apiUrls.log",
 logger=logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-import gkeepapi
+#import gkeepapi
 
 @api_urls.route('/api/keep/shopping')
 def keep():
-    keep = gkeepapi.Keep()
-    success = keep.login('moinahmed001@gmail.com', '.August5')
+#    keep = gkeepapi.Keep()
+#    success = keep.login('moinahmed001@gmail.com', '.August5')
 
-    shopping = keep.get("1v9Cn-4RczmFNNOet9L4cHwodvWaBHFb8VJHKTKiqiqYFLzmqsEtBjCP8SZkDP7nI-Jcwuw")
-    result=[]
-    for item in shopping.unchecked:
-        if item.text and item.text != "":
-            result.append(item.text)
-    parsed = jsonify(result)
-    return parsed
+#    shopping = keep.get("1v9Cn-4RczmFNNOet9L4cHwodvWaBHFb8VJHKTKiqiqYFLzmqsEtBjCP8SZkDP7nI-Jcwuw")
+#    result=[]
+#    for item in shopping.unchecked:
+#        if item.text and item.text != "":
+#            result.append(item.text)
+#    parsed = jsonify(result)
+#    return parsed
+    return "{test:'data'}"
 
 # curl -H 'Authorization: Bearer 38369370-cd58-4bb9-8099-775119e64b2e' https://api.smartthings.com/v1/devices/44eaae31-4cd4-5ccd-9985-51dcfabf80d6/status | python -m json.tool
 @api_urls.route('/api/samsung/tv/status')

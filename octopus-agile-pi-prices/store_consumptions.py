@@ -31,9 +31,20 @@ def insertOrUpdateVariableIntoTable(datetime, consumption):
             sqliteConnection.close()
             print("The SQLite connection is closed. We are done here.")
 
-
-response = requests.get('https://api.octopus.energy/v1/electricity-meter-points/1050001232117/meters/20L3751053/consumption/', auth=('sk_live_xL8q1cUYWnc4cOgpR0X0iwMm', ''))
+# i = 1
+# while i < 40:
+    # print('>>>>>' + 'https://api.octopus.energy/v1/electricity-meter-points/1012365897569/meters/16K0245801/consumption/?page='+str(i))
+response = requests.get('https://api.octopus.energy/v1/electricity-meter-points/1012365897569/meters/16K0245801/consumption/', auth=('sk_live_l9L4iBkcPXPtCAg2QsUmiQb8', ''))
+# response = requests.get('https://api.octopus.energy/v1/electricity-meter-points/1012365897569/meters/16K0245801/consumption/?page='+str(i), auth=('sk_live_l9L4iBkcPXPtCAg2QsUmiQb8', ''))
 pricedata = response.json()
+for result in pricedata['results']:
+	consumption = result['consumption']
+	raw_from = result['interval_start'].replace('+01:00','Z')
+	print(raw_from)
+	print(consumption)
+	insertOrUpdateVariableIntoTable(raw_from, consumption)
+
+    # i += 1
 
 # consumption = pricedata['results'][0]['consumption']
 # raw_from = pricedata['results'][0]['interval_start']
@@ -47,10 +58,4 @@ pricedata = response.json()
 #
 # insertOrUpdateVariableIntoTable(raw_from, consumption)
 
-
-for result in pricedata['results']:
-	consumption = result['consumption']
-	raw_from = result['interval_start'].replace('+01:00','Z')
-	print(raw_from)
-	print(consumption)
-	insertOrUpdateVariableIntoTable(raw_from, consumption)
+#print(pricedata)
